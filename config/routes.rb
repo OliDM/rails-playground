@@ -10,7 +10,14 @@ Rails.application.routes.draw do
   if Rails.env.development?
     mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
   end
+
+  root to: "library#index"
+
   draw_routes("default", "apollo", "relay", "service_workers", "spa")
   post "/graphql", to: "graphql#execute"
+
+  resources :library
+  resources :book
+  resources :author
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

@@ -82,15 +82,20 @@ export class HttpRequester {
   // }
 
   //rails specific
-  appendHeaders(configuration) {
+  addCSRFToken(configuration) {
     var token = this.csrfToken();
     var property = this.csrfParam()
-
-    if (property && token) {
-      var headers = new Headers();
-      headers.append(property, token);
-      configuration.headers = headers
+    if (token) {
+      configuration.headers["X-CSRF-Token"] = token;
     }
+  }
+
+  transformHeader(configuration){
+    let { headers } = configuration;
+    let newHeaders = new Headers();
+    let keys = Object.keys(configuration.headers);
+    keys.forEach((key) => newHeaders.append(key, headers[key]));
+    configuration.headers = newHeaders;
   }
 
   csrfToken(){
@@ -102,17 +107,19 @@ export class HttpRequester {
   }
 
   xhr(url, method, data, success, failure, options) {
-    var requestURL;
+    var requestURL = url;
     var configuration = {
       method: method,
-      credentials: "same-origin"
+      credentials: "same-origin",
+      headers: {}
     };
-    this.appendHeaders(configuration);
 
+    this.addCSRFToken(configuration);
 
     if (BODY_PARAMS_METHODS.indexOf(method) > -1) {
       configuration.body = JSON.stringify(data);
       configuration.headers = {
+        ...configuration.headers,
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=utf-8'
       }
@@ -125,7 +132,7 @@ export class HttpRequester {
     let successCallback = this.makeSuccessCallback(success);
     let failureCallback = this.makeFailureCallback(failure);
 
-    fetch(requestURL, configuration).then(checkStatus).then(successCallback).catch(failureCallback);
+    fetch(requestURL, configuration).then(this.checkStatus).then(successCallback).catch(failureCallback);
   }
 
   makeSuccessCallback(callback) {
@@ -145,7 +152,7 @@ export class HttpRequester {
     return (response) => {
       console.log(response);
       if (callback && typeof (callback) == 'function') {
-        failure(response);
+        callback(response);
       } else {
         console.log(response);
       }
