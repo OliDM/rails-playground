@@ -38,6 +38,7 @@ gem 'webpacker'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'graphql'
 gem 'react-rails'
+gem 'hamlit-rails'
 
 group :development, :test do
   gem 'ffaker'
