@@ -4,14 +4,14 @@ export default class LibraryDetail extends React.Component {
     event.preventDefault();
     this.props.toggleActive(this.props.id, false);
   }
-  
+
   activate(event){
     event.preventDefault();
     this.props.toggleActive(this.props.id, true);
   }
 
   render() {
-    let { name, phoneNumber, address, active, authorsCount, booksCount, active } = this.props;
+    let { name, phoneNumber, address, active, authorsCount, booksCount } = this.props;
     return (
       <div>
         <div>

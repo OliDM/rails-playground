@@ -33,7 +33,7 @@ const FIND_QUERY = (id) => {
     path
     active
     books{
-      url
+      title
       path
     }
     authors{
