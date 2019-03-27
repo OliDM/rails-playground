@@ -1,5 +1,12 @@
 import React from "react";
 export default class LibraryDetail extends React.Component {
+  constructor(props, context){
+    super(props, context);
+
+    this.deactivate = this.deactivate.bind(this);
+    this.activate = this.activate.bind(this);
+  }
+
   deactivate(event){
     event.preventDefault();
     this.props.toggleActive(this.props.id, false);

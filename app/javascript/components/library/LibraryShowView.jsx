@@ -3,6 +3,12 @@ import store from "../../stores/LibraryStore";
 import LibraryDetail from "./LibraryDetail"
 
 export default class LibraryShowView extends React.Component {
+  constructor(props, context){
+    super(props, context);
+
+    this.toggleActive = this.toggleActive.bind(this);
+  }
+
   componentDidMount() {
     let { store, id } = this.props;
     store.addChangeListener(() => this.forceUpdate());
