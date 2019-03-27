@@ -9,5 +9,11 @@
     = javascript_include_tag 'application'
     = javascript_pack_tag 'application'
     = stylesheet_pack_tag 'application'
-  %body
-    = yield
+  %body#page-top
+    #wrapper
+      = render partial: "layouts/sidebar"
+      #content-wrapper.d-flex.flex-column
+        = render partial: "layouts/topbar"
+        = yield
+        = render partial: "layouts/footer"
+
