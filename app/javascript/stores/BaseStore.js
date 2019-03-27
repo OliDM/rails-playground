@@ -1,5 +1,10 @@
 import { HttpRequester } from "../utils/httpRequester";
 import Dispatcher from "../utils/Dispatcher";
+export const REQUEST_TYPES = {
+  single: "single",
+  collection: "collectio",
+  mutation: "mutation"
+}
 
 export default class BaseStore {
   constructor(queries = {}, changeEvent) {
@@ -16,6 +21,7 @@ export default class BaseStore {
     this.fetched = false;
     this._browserHistoryManager = undefined;
     this._queries = queries;
+    this._requestType = REQUEST_TYPES.single;
 
     this._requesterClass = new HttpRequester();
     this._recordsKey = "libraries";
@@ -23,7 +29,6 @@ export default class BaseStore {
     this._requestSuccess = this._requestSuccess.bind(this);
     this._requestSuccessOnPop = this._requestSuccessOnPop.bind(this);
     this._populateFetchedRecords = this._populateFetchedRecords.bind(this);
-    this._requestSuccessSingle = this._requestSuccessSingle.bind(this);
     this._requestFailure = this._requestFailure.bind(this);
     this.addChangeListener = this.addChangeListener.bind(this);
     this.addpushStateListener = this.addpushStateListener.bind(this);
@@ -50,7 +55,11 @@ export default class BaseStore {
     this._responseExtraPreparation = this._responseExtraPreparation.bind(this);
     this.resetFilters = this.resetFilters.bind(this);
 
-    // this.__browserHistoryClass = BrowserHistoryManager;
+    this.extractors = {
+      [REQUEST_TYPES.collection]: this.collectionExtractor,
+      [REQUEST_TYPES.single]: this.singleExtractor,
+      [REQUEST_TYPES.mutation]: this.mutationExtractor
+    };
   }
 
   resetFilters() {
@@ -89,7 +98,8 @@ export default class BaseStore {
 
   find(ID) {
     let params = this.toQuery(this._queries.find(ID));
-    this._requesterClass.post(this._ENDPOINT_URL, params, this._requestSuccessSingle, this._requestFailure);
+    this._requestType = REQUEST_TYPES.single;
+    this._requesterClass.post(this._ENDPOINT_URL, params, this._requestSuccess, this._requestFailure);
     this.fetching = true;
     this.fetched = true;
   }
@@ -106,6 +116,7 @@ export default class BaseStore {
   }
 
   fetch() {
+    this._requestType = REQUEST_TYPES.collection;
     let params = this.toQuery(this._queries.fetch);
     this._requesterClass.post(this._ENDPOINT_URL, params, this._requestSuccess, this._requestFailure);
     this.fetching = true;
@@ -237,7 +248,7 @@ export default class BaseStore {
     var { collectionResponse, singleResponse, queryParams } = hydrationData;
 
     collectionResponse && this._requestSuccess(collectionResponse);
-    singleResponse && this._requestSuccessSingle(singleResponse);
+    singleResponse && this._requestSuccess(singleResponse);
     queryParams && this.setQueryParams(queryParams);
 
     return this;
@@ -257,7 +268,18 @@ export default class BaseStore {
     this._limit = Number.isInteger(response.limit) ? response.limit : this._limit;
   }
 
-  _setRecords(records) {
+  _setRecords(response) {
+    const data = response.data;
+    this.extractors[this._requestType].call(this, data);
+    return this;
+  }
+
+  collectionExtractor(data, ignoreUndefined = false){
+    let records = data[this._recordsKey];
+    if(ignoreUndefined && !records){
+      return this;
+    }
+
     this._records.length = 0;
     records.forEach(record =>
       this._records.push(record)
@@ -266,16 +288,22 @@ export default class BaseStore {
     return this;
   }
 
-  _setRecord(response) {
-    this._record = response;
-    this._records = this._records
-      .concat(response)
-      .filter(
-        (record, index) =>
-          this._records.indexOf(record) === index
-      );
+  singleExtractor(data, ignoreUndefined = false){
+    let record = data[this._recordKey];
+    if(ignoreUndefined && !record){
+      return this;
+    }
 
+    this._record = record
     return this;
+  }
+
+  mutationExtractor(response){
+    let key = Object.keys(response)[0];
+    let data = response[key] ;
+
+    this.singleExtractor(data, true);
+    this.collectionExtractor(data, true)
   }
 
   setQueryParams(newParams) {
@@ -310,7 +338,7 @@ export default class BaseStore {
   _populateFetchedRecords(response, status, xhr) {
     this._processMetadata(response, xhr);
     this._readPagination(response, xhr);
-    this._setRecords(response.data[this._recordsKey]);
+    this._setRecords(response);
     this._responseExtraPreparation(response, status, xhr);
     this.fetching = false;
     this._emit();
@@ -338,13 +366,13 @@ export default class BaseStore {
     this._requesterClass.post(this._ENDPOINT_URL, this.queryParams(), this._requestSuccessOnPop, this._requestFailure);
   }
 
-  _requestSuccessSingle(response, status, xhr) {
-    this.fetched = true;
-    this._processMetadata(xhr);
-    this._setRecord(response.data[this._recordKey]);
-    this.fetching = false;
-    this._emit();
-  }
+  // _requestSuccessSingle(response, status, xhr) {
+  //   this.fetched = true;
+  //   this._processMetadata(xhr);
+  //   this._setRecord(response);
+  //   this.fetching = false;
+  //   this._emit();
+  // }
 
   _requestFailure() {
     this.fetching = false;
