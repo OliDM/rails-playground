@@ -39,6 +39,7 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'graphql'
 gem 'react-rails'
 gem 'hamlit-rails'
+gem 'bootstrap', '~> 4.3.1'
 
 group :development, :test do
   gem 'ffaker'

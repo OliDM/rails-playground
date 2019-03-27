@@ -1,0 +1,15 @@
+%ul#accordionSidebar.navbar-nav.bg-gradient-primary.sidebar.sidebar-dark.accordion
+  / Sidebar - Brand
+  %a.sidebar-brand.d-flex.align-items-center.justify-content-center{:href => "/"}
+    .sidebar-brand-icon.rotate-n-15
+      %i.fas.fa-laugh-wink
+    .sidebar-brand-text.mx-3
+      Rails playground
+  / Divider
+  %hr.sidebar-divider.my-0/
+  = render partial: "layouts/sidebar_item", locals: { href: "/", text: "Home", css_class: "active" }
+  = render partial: "layouts/sidebar_item", locals: { href: "/apollo", text: "apollo", css_class: "" }
+  = render partial: "layouts/sidebar_item", locals: { href: "/relay", text: "relay", css_class: "" }
+  = render partial: "layouts/sidebar_item", locals: { href: "/spa", text: "spa", css_class: "" }
+  = render partial: "layouts/sidebar_item", locals: { href: "/ssr-spa", text: "ssr-spa", css_class: "" }
+  = render partial: "layouts/sidebar_item", locals: { href: "/service-worker-spa", text: "service-worker-spa", css_class: "" }
