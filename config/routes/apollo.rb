@@ -1,3 +1,0 @@
-namespace :apollo do
-
-end

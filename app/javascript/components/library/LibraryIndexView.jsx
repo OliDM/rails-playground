@@ -1,25 +1,26 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import LibraryFilters from "./LibraryFilters"
 import LibraryList from "./LibraryList"
-import LibraryStore from "../../stores/LibraryStore";
 
-export default class LibraryIndexView extends React.Component {
-  componentDidMount() {
-    this.props.store.addChangeListener(() => this.forceUpdate());
-    this.props.store.fetch();
+export default function LibraryIndexView({ libraries, loading }) {
+  if (loading) {
+    return <span>Loading Data</span>;
   }
+  const { pathname } = useLocation();
 
-  render() {
-    let libraries = this.props.store.getRecords();
-    return (
-      <div>
-        <LibraryFilters></LibraryFilters>
-        <LibraryList libraries={libraries}></LibraryList>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <LibraryFilters></LibraryFilters>
+      <Link to={`${pathname}/library/new`}>
+        <button> Create a new Library</button>
+      </Link>
+      <LibraryList libraries={libraries}></LibraryList>
+    </div>
+  );
 }
 
 LibraryIndexView.defaultProps = {
-  store: LibraryStore
+  libraries: [],
+  loading: false
 }

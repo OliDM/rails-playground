@@ -42,6 +42,7 @@ gem 'hamlit-rails'
 gem 'bootstrap', '~> 4.3.1'
 
 group :development, :test do
+  gem 'pry-byebug'
   gem 'ffaker'
   gem 'graphiql-rails'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -67,5 +68,3 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
-
-gem 'graphiql-rails', group: :development

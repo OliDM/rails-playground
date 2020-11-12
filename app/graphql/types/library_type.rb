@@ -20,7 +20,7 @@ module Types
     end
 
     def path
-      ::Services::UrlHelpers.library_path(object.id)
+      "/library/#{object.id}"
     end
 
   end
